@@ -4,7 +4,6 @@
 
 <script>
 import StarIcon from "@/components/icons/StarIcon.vue"
-import FilledStarIcon from "@/components/icons/FilledStarIcon.vue"
 import FullPathIcon from "@/components/icons/FullPathIcon.vue"
 
 export default {
@@ -16,8 +15,7 @@ export default {
   },
   components: {
     StarIcon,
-    FilledStarIcon,
     FullPathIcon,
-  },
+  }
 }
 </script>
