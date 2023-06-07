@@ -17,7 +17,7 @@ const { data } = storeToRefs(dataStore)
 
 const input = ref(0)
 
-const calculateResult = () => {
+const calculateResult = (): number => {
   return data.value.stages.reduce((accum: number, stage) => {
     return (accum + stage.games.reduce((accum: number, game) => {
       return accum + game.bestResult
@@ -27,7 +27,7 @@ const calculateResult = () => {
 
 input.value = calculateResult()
 
-const gettingPoints = () => {
+const gettingPoints = (): number[] => {
   return data.value.stages.map(stage => stage.thresholdPoints)
 }
 

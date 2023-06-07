@@ -35,7 +35,7 @@ import IconsController from '@/components/IconsController.vue'
 
 const props = defineProps({
   data: {
-    type: Object,
+    type: Array as () => number[],
     required: true
   },
   score: {
@@ -49,7 +49,7 @@ const { data, score } = toRefs(props)
 const stepsLength = computed(() => data.value.length)
 const stepPercent = computed(() => 100 / stepsLength.value)
 
-const calcPercent = () => {
+const calcPercent = (): number => {
   let total = 0
   let preStep = 0
   data.value.forEach((point: number, index: number) => {
@@ -77,7 +77,9 @@ const isCurrentStep = (index: number) => {
   )
 }
 
-const isComplete = (index: number) => score.value >= data.value[index] ?? false
+const isComplete = (index: number) => {
+  return score.value >= data.value[index]
+}
 </script>
 
 <style lang='scss' scoped>
