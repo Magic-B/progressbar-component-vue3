@@ -1,8 +1,8 @@
 <template>
   <div>
-    <ProgressBar :data='data' :field='input'/>
+    <ProgressBar :data='points' :score='input'/>
     <div style="margin: 50px auto">
-      <input type="number" v-model='input' />
+      <input type="number" v-model.number='input' :min='0' :max='points[points.length - 1]'/>
     </div>
   </div>
 </template>
@@ -26,6 +26,10 @@ const calculateResult = () => {
 }
 
 input.value = calculateResult()
-</script>
 
-<style scoped></style>
+const gettingPoints = () => {
+  return data.value.stages.map(stage => stage.thresholdPoints)
+}
+
+const points = gettingPoints()
+</script>

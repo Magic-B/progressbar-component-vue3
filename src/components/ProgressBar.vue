@@ -8,7 +8,7 @@
         ></div>
       </div>
       <div class="progress-bar__steps">
-        <template v-for="(step, index) in data.stages" :key="step.id">
+        <template v-for="(step, index) in data" :key="index">
           <div class="progress-bar__step">
             <IconsController
               class="progress-bar__top"
@@ -19,8 +19,8 @@
               :name="index === stepsLength - 1 ? 'full-path' : 'star'"
             />
             <span class="progress-bar__bottom">
-              {{ isCurrentStep(index) ? field + " / " : "" }}
-              {{ step.thresholdPoints }}
+              {{ isCurrentStep(index) && score ? score + " / " : "" }}
+              {{ step }}
             </span>
           </div>
         </template>
@@ -38,32 +38,29 @@ const props = defineProps({
     type: Object,
     required: true
   },
-  field: {
+  score: {
     type: Number,
-    required: true,
+    required: false,
     default: 0
   }
 })
 
-const { data, field } = toRefs(props)
-const stepsLength = data.value.stages.length
+const { data, score } = toRefs(props)
+const stepsLength = computed(() => data.value.length)
+const stepPercent = computed(() => 100 / stepsLength.value)
 
 const calcPercent = () => {
-  const stepsLength = data.value.stages.length
-  const stepPercent = 100 / stepsLength
-
   let total = 0
-  let last = 0
-  data.value.stages.forEach((stage: any, index: number) => {
-    if (field.value >= last && field.value <= stage.thresholdPoints) {
-      const stepNumber = field.value - last
-      const stepAmount = stage.thresholdPoints - last
+  let preStep = 0
+  data.value.forEach((point: number, index: number) => {
+    if (score.value >= preStep && score.value <= point) {
+      const stepNumber = score.value - preStep
+      const stepAmount = point - preStep
       const percentageOfStepNumber = (stepNumber * 100) / stepAmount
-      const percentageOfTheScaleNumber =
-        (percentageOfStepNumber * 100) / (stepsLength * 100)
-      total = percentageOfTheScaleNumber + index * stepPercent
+      const percentageOfTheScaleNumber = (percentageOfStepNumber * 100) / (stepsLength.value * 100)
+      total = percentageOfTheScaleNumber + index * stepPercent.value
     }
-    last = stage.thresholdPoints
+    preStep = point
   })
   return total
 }
@@ -71,22 +68,21 @@ const calcPercent = () => {
 const progress = computed(calcPercent)
 
 const isCurrentStep = (index: number) => {
-  if (field.value < data.value.stages[index - 1]?.thresholdPoints) {
+  if (score.value < data.value[index - 1]) {
     return false
   }
   return (
-    field.value < data.value.stages[index].thresholdPoints &&
-    field.value < data.value.stages[index + 1]?.thresholdPoints
+      score.value < data.value[index] &&
+      score.value < data.value[index + 1]
   )
 }
 
-const isComplete = (index: number) => {
-  return field.value >= data.value.stages[index]?.thresholdPoints ?? false
-}
+const isComplete = (index: number) => score.value >= data.value[index] ?? false
 </script>
 
 <style lang='scss' scoped>
 @import "@/assets/variables.scss";
+
 .progress-bar__scale {
   position: relative;
   width: 900px;
@@ -155,6 +151,7 @@ const isComplete = (index: number) => {
 }
 .progress-bar__step:last-child .progress-bar__top {
   width: auto;
+  top: -30px;
   right: 0px;
 }
 
