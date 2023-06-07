@@ -19,7 +19,7 @@
               :name="index === stepsLength - 1 ? 'full-path' : 'star'"
             />
             <span class="progress-bar__bottom">
-              {{ isCurrentStep(index) ? result + " / " : "" }}
+              {{ isCurrentStep(index) ? field + " / " : "" }}
               {{ step.thresholdPoints }}
             </span>
           </div>
@@ -27,36 +27,26 @@
       </div>
     </div>
   </div>
-  <div style="margin: 50px auto">
-    <input type="number" v-model="result" />
-    <input type="number" v-model="progress" />
-  </div>
 </template>
 
 <script setup lang="ts">
-import { computed, ref } from "vue"
-import { useDataStore } from "@/stores/data"
-import IconsController from "@/components/IconsController.vue"
-import { storeToRefs } from "pinia"
+import { computed, toRefs} from 'vue'
+import IconsController from '@/components/IconsController.vue'
 
-const dataStore = useDataStore()
-const { data } = storeToRefs(dataStore)
+const props = defineProps({
+  data: {
+    type: Object,
+    required: true
+  },
+  field: {
+    type: Number,
+    required: true,
+    default: 0
+  }
+})
 
+const { data, field } = toRefs(props)
 const stepsLength = data.value.stages.length
-
-const calculateResult = () => {
-  return data.value.stages.reduce((accum, stage) => {
-    return (
-      accum +
-      stage.games.reduce((accum, game) => {
-        return accum + game.bestResult
-      }, 0)
-    )
-  }, 0)
-}
-
-const result = ref(0)
-result.value = calculateResult()
 
 const calcPercent = () => {
   const stepsLength = data.value.stages.length
@@ -64,9 +54,9 @@ const calcPercent = () => {
 
   let total = 0
   let last = 0
-  data.value.stages.forEach((stage, index) => {
-    if (result.value >= last && result.value <= stage.thresholdPoints) {
-      const stepNumber = result.value - last
+  data.value.stages.forEach((stage: any, index: number) => {
+    if (field.value >= last && field.value <= stage.thresholdPoints) {
+      const stepNumber = field.value - last
       const stepAmount = stage.thresholdPoints - last
       const percentageOfStepNumber = (stepNumber * 100) / stepAmount
       const percentageOfTheScaleNumber =
@@ -81,26 +71,27 @@ const calcPercent = () => {
 const progress = computed(calcPercent)
 
 const isCurrentStep = (index: number) => {
-  if (result.value < data.value.stages[index - 1]?.thresholdPoints) {
+  if (field.value < data.value.stages[index - 1]?.thresholdPoints) {
     return false
   }
   return (
-    result.value < data.value.stages[index].thresholdPoints &&
-    result.value < data.value.stages[index + 1]?.thresholdPoints
+    field.value < data.value.stages[index].thresholdPoints &&
+    field.value < data.value.stages[index + 1]?.thresholdPoints
   )
 }
 
-const isComplete = (index: any) => {
-  return result.value >= data.value.stages[index]?.thresholdPoints ?? false
+const isComplete = (index: number) => {
+  return field.value >= data.value.stages[index]?.thresholdPoints ?? false
 }
 </script>
 
-<style scoped>
+<style lang='scss' scoped>
+@import "@/assets/variables.scss";
 .progress-bar__scale {
   position: relative;
   width: 900px;
   height: 40px;
-  background: #efefef;
+  background: $progress-bar-bg;
   border-radius: 30px;
 }
 .progress-bar__scale-container {
@@ -122,14 +113,14 @@ const isComplete = (index: any) => {
   flex-grow: 1;
   z-index: 3;
   height: 100%;
-  border-right: 2px solid #c4c4c4;
+  border-right: 2px solid $steps-color;
 }
 .progress-bar__step:last-child {
   border-right: none;
 }
 .progress-bar__indicator {
   height: 100%;
-  background: #3300ff;
+  background: $primary;
   z-index: 2;
 
   transition: width 300ms ease;
@@ -160,7 +151,7 @@ const isComplete = (index: any) => {
   width: 22px;
   top: -30px;
   right: -13px;
-  fill: #3300ff;
+  fill: $primary;
 }
 .progress-bar__step:last-child .progress-bar__top {
   width: auto;
